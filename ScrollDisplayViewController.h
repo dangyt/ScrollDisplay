@@ -12,6 +12,18 @@
 //专门加载网络图片的库---第三方类库
 #import <UIImageView+WebCache.h>
 
+
+//SDWebImage对UIButton的类拓展
+#import <UIButton+WebCache.h>
+
+@class ScrollDisplayViewController;//定义协议
+@protocol ScrollDisplayViewControllerDelegate <NSObject>
+//当用户点击了某一页触发
+-(void)scrollDisplayViewController:(ScrollDisplayViewController *)scrollDisplayViewController didSelectedIndex:(NSInteger)index;
+@end
+
+
+
 @interface ScrollDisplayViewController : UIViewController
 
 /* 返回值
@@ -24,6 +36,8 @@
 -(instancetype)initWithImgNames:(NSArray *)imgNames;
 //传入视图控制器
 -(instancetype)initWithControllers:(NSArray *)controllers;
+
+@property(nonatomic,weak)id <ScrollDisplayViewControllerDelegate>delegate;
 
 //需要相应属性保存 图片地址、图片名、控制器（只读）
 @property(nonatomic,readonly)NSArray *imgPaths;

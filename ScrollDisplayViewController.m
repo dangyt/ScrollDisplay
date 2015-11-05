@@ -22,9 +22,16 @@
         NSMutableArray *arr = [NSMutableArray new];//存放vc
         for (int i= 0; i < imgNames.count; i++) {
             UIImage *img = [UIImage imageNamed:imgNames[i]];
-            UIImageView *imgView = [[UIImageView alloc]initWithImage:img];
+            UIButton *btn = [UIButton buttonWithType:0];
+            [btn setBackgroundImage:img forState:0];
+
             UIViewController *vc = [UIViewController new];
-            vc.view = imgView;
+            vc.view = btn;
+            btn.tag = 1000+i;
+            [btn bk_addEventHandler:^(UIButton *sender) {
+                [self.delegate scrollDisplayViewController:self didSelectedIndex:sender.tag-1000];
+            } forControlEvents:UIControlEventTouchUpInside];
+            
             [arr addObject:vc];
         }
     if (self = [self initWithControllers:arr]) {
@@ -57,22 +64,28 @@
     for (int i = 0; i < imgPaths.count; i ++)
     {
         id path = imgPaths[i];
-        UIImageView *imgView = [UIImageView new];
+        //为了监控用户当前点击的是哪个图片,用button来显示图片(监测点击方法)
+        UIButton *btn = [UIButton buttonWithType:0];
         if ([self isURL:path]) {
-            [imgView sd_setImageWithURL:path];
+            [btn sd_setBackgroundImageWithURL:path forState:0];
         }else if([self isNetPath:path]){
             NSURL *url = [NSURL URLWithString:path];
-            [imgView sd_setImageWithURL:url];
+            [btn sd_setBackgroundImageWithURL:url forState:0];
         }else if([path isKindOfClass:[NSString class]]){
 //     本地地址
             NSURL *url = [NSURL fileURLWithPath:path];
-            [imgView sd_setImageWithURL:url];
+            [btn sd_setBackgroundImageWithURL:url forState:0];
         }else{
 //   这里可以给imageView 设置一个裂开的本地图片
-            imgView.image = [UIImage imageNamed:@"error@3x"];
+             [btn setImage:[UIImage imageNamed:@"error@3x"] forState:0];
         }
         UIViewController *vc = [UIViewController new];
-        vc.view = imgView;
+        vc.view = btn;
+        btn.tag = 1000+i;
+        [btn bk_addEventHandler:^(UIButton *sender) {
+            [self.delegate scrollDisplayViewController:self didSelectedIndex:sender.tag-1000];
+        } forControlEvents:UIControlEventTouchUpInside];
+        
         [arr addObject:vc];
     }
     self = [self initWithControllers:arr];
