@@ -97,9 +97,67 @@
     if (self = [super init]) {
 // 为了防止实参是可变数组，需要复制一份出来。这样可以保证属性不会因为可变数组不会因为可变数组在外部被修改，而导致随之改变了
         _controllers = [controllers copy];
+        
+/** 设置默认值 */
+        _autoCycle = YES;
+        _canCycle = YES;
+        _showPageControl = YES;
+        _duration = 3;
+        _pageControlOffset = 0;
     }
     return self;
 }
+
+/** 重写set方法 */
+-(void)setAutoCycle:(BOOL)autoCycle
+{
+    _autoCycle = autoCycle;
+    [_timer invalidate];
+    
+    if (!autoCycle) {/** 如果为NO */
+        return;
+    }
+    _timer = [NSTimer bk_scheduledTimerWithTimeInterval:_duration block:^(NSTimer *timer) {
+        /** 滚动的方法 */
+        UIViewController *vc = _pageVC.viewControllers.firstObject;/** 当前页 */
+        NSInteger index = [_controllers indexOfObject:vc];
+        UIViewController *nextVC = nil;
+        if (index == _controllers.count-1) {
+            if (!_canCycle) {
+                return ;
+            }
+            nextVC = _controllers.firstObject;
+        }else{
+            nextVC = _controllers[index+1];
+        }
+        /** 翻页操作 */
+        __block ScrollDisplayViewController *vca = self;
+        [_pageVC setViewControllers:@[nextVC] direction:0 animated:YES completion:^(BOOL finished) {
+            /** 让小圆点随着页面滚动 */
+            [vca configPageControl];
+        }];
+    } repeats:YES];
+}
+-(void)setShowPageControl:(BOOL)showPageControl
+{
+    _showPageControl = showPageControl;
+    _pageControl.hidden = !showPageControl;
+}
+-(void)setDuration:(NSTimeInterval)duration
+{
+    _duration = duration;
+    /** 要想修改滚动的时间间隔，说明timer要重启才行 */
+    self.autoCycle = _autoCycle;
+}
+-(void)setPageControlOffset:(CGFloat)pageControlOffset
+{
+    _pageControlOffset = _pageControlOffset;
+    /** 更新页面数量控件 bottom 约束*/
+    [_pageControl mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.bottom.mas_equalTo(_pageControlOffset);
+    }];
+}
+
 
 
 - (void)viewDidLoad {
@@ -132,6 +190,11 @@
     }];
     //不让用户点击小圆点
     _pageControl.userInteractionEnabled = NO;
+    
+    self.autoCycle = _autoCycle;
+    self.showPageControl = _showPageControl;
+    self.pageControlOffset = _pageControlOffset;
+
 }
 
 //配置小圆点的位置
@@ -152,7 +215,7 @@
 {//获取当前的索引
     NSInteger index = [_controllers indexOfObject:viewController];
     if (index == 0) {
-        return _controllers.lastObject;
+        return  _canCycle?_controllers.lastObject:nil;
     }
     return _controllers[index-1];
 }
@@ -160,7 +223,7 @@
 {
    NSInteger index = [_controllers indexOfObject:viewController];
     if (index == _controllers.count-1) {
-        return _controllers.firstObject;
+        return  _canCycle? _controllers.firstObject:nil;
     }
     return _controllers[index+1];
 }

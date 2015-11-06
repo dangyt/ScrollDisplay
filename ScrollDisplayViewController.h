@@ -49,5 +49,20 @@
 //用于展示小圆点
 @property(nonatomic,readonly)UIPageControl *pageControl;
 
+//设置是否循环滚动，默认为YES表示可以循环
+@property(nonatomic)BOOL canCycle;
+//设置是否定时滚动，默认为YES，表示定时滚动
+@property(nonatomic)BOOL autoCycle;
+//滚动时间，默认3秒
+@property(nonatomic)NSTimeInterval duration;
+//是否显示 页数提示,默认YES，显示
+@property(nonatomic)BOOL showPageControl;
+//当前页数
+@property(nonatomic)NSInteger currentpage;
+//设置页数提示的垂直偏移量，正数表示向下移动
+@property(nonatomic)CGFloat pageControlOffset;
+//设置页数的圆点正常颜色
+//设置页数圆点的高亮颜色....
+
 
 @end
